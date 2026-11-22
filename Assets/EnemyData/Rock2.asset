@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f4f4d4e67f2b7b4faa479630af503b5, type: 3}
   m_Name: Rock2
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
-  enemyName: 
+  enemyName: Rock2
   enemyPrefab: {fileID: 0}
+  scoreValue: 15
   health: 4
   damage: 2

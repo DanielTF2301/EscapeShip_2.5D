@@ -1,24 +1,14 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+// Remembers the last checkpoint reached. It is saved with SaveSystem (PlayerPrefs), so it survives
+// level reloads and also closing the game.
+// It only counts for the scene where it was reached: in any other level it is ignored.
 public static class CheckpointManager
 {
-    static bool hasCheckpoint;
-    static string checkpointScenePath;
-    static Vector3 checkpointPosition;
-
-    // Keeps the data clean between Play sessions even if domain reload is disabled.
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    static void ResetState()
-    {
-        hasCheckpoint = false;
-    }
-
     public static void SetCheckpoint(Vector3 position)
     {
-        hasCheckpoint = true;
-        checkpointScenePath = SceneManager.GetActiveScene().path;
-        checkpointPosition = position;
+        SaveSystem.SaveCheckpoint(SceneManager.GetActiveScene().path, position);
     }
 
     /// <summary>
@@ -26,30 +16,21 @@ public static class CheckpointManager
     /// </summary>
     public static bool IsCurrent(Vector3 position)
     {
-        return hasCheckpoint
-            && checkpointScenePath == SceneManager.GetActiveScene().path
-            && (checkpointPosition - position).sqrMagnitude < 0.0001f;
+        return TryGetCheckpoint(out Vector3 saved)
+            && (saved - position).sqrMagnitude < 0.0001f;
     }
 
     /// <summary>
     /// Gives the checkpoint of the current level, if there is one.
-    /// A checkpoint from another level is discarded.
+    /// A checkpoint saved in another level is ignored.
     /// </summary>
     public static bool TryGetCheckpoint(out Vector3 position)
     {
-        if (hasCheckpoint && checkpointScenePath == SceneManager.GetActiveScene().path)
-        {
-            position = checkpointPosition;
-            return true;
-        }
-
-        hasCheckpoint = false;
-        position = Vector3.zero;
-        return false;
+        return SaveSystem.TryGetCheckpoint(SceneManager.GetActiveScene().path, out position);
     }
 
     public static void Clear()
     {
-        hasCheckpoint = false;
+        SaveSystem.ClearCheckpoint();
     }
 }

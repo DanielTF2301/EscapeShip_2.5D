@@ -36,6 +36,7 @@ public class PlayerShooting : MonoBehaviour
         shootAudio.playOnAwake = false;
         shootAudio.loop = false;
         shootAudio.spatialBlend = 0f;
+        shootAudio.outputAudioMixerGroup = VolumeManager.SfxGroup;
     }
 
     /// <summary>

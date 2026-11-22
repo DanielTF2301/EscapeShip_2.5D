@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   enemyName: Rock3
   enemyPrefab: {fileID: 0}
+  scoreValue: 15
   health: 2
   damage: 2

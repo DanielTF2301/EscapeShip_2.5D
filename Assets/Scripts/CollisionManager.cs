@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class CollisionManager : MonoBehaviour
 {
@@ -14,7 +13,7 @@ public class CollisionManager : MonoBehaviour
     [SerializeField] private ParticleSystem landingParticleSystem;
 
     [Header("Restart Settings")]
-    [Tooltip("Minimum seconds before the level restarts. It always waits for the whole landing clip.")]
+    [Tooltip("Minimum seconds before the next level loads. It always waits for the whole landing clip.")]
     [SerializeField] private float landingReloadDelay = 1f;
     [Tooltip("Minimum seconds before the level restarts. It always waits for the whole explosion clip.")]
     [SerializeField] private float explosionReloadDelay = 1f;
@@ -34,6 +33,7 @@ public class CollisionManager : MonoBehaviour
         endSound.playOnAwake = false;
         endSound.loop = false;
         endSound.spatialBlend = 0f;
+        endSound.outputAudioMixerGroup = VolumeManager.SfxGroup;
     }
 
     void OnCollisionEnter(Collision collision)
@@ -46,9 +46,7 @@ public class CollisionManager : MonoBehaviour
                 Debug.Log("LaunchPad Collision Detected");
                 break;
             case "LandingPad":
-                // Level completed: the next start has to be from the beginning.
-                CheckpointManager.Clear();
-                ManageCollision(landingAudioClip, landingParticleSystem, landingReloadDelay);
+                CompleteLevel();
                 break;
             case "Explosion":
                 Explode();
@@ -59,20 +57,44 @@ public class CollisionManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Level completed: landing music, then the next level.
+    /// </summary>
+    private void CompleteLevel()
+    {
+        if (!isControllable) return;
+
+        // The checkpoint of this level is no longer needed.
+        CheckpointManager.Clear();
+
+        if (ScoreManager.Instance != null)
+        {
+            ScoreManager.Instance.CompleteLevel();
+        }
+
+        ManageCollision(landingAudioClip, landingParticleSystem, landingReloadDelay, true);
+    }
+
+    /// <summary>
     /// Blows up the ship: explosion sound and particles, then the level restarts.
     /// Public so other scripts (for example PlayerHealth at zero lives) can trigger it.
     /// </summary>
     public void Explode()
     {
         if (!isControllable) return;
-        ManageCollision(explosionAudioClip, explosionParticleSystem, explosionReloadDelay);
+
+        if (ScoreManager.Instance != null)
+        {
+            ScoreManager.Instance.RegisterDeath();
+        }
+
+        ManageCollision(explosionAudioClip, explosionParticleSystem, explosionReloadDelay, false);
     }
 
     /// <summary>
     /// Disables player control, stops the engine sound, plays the clip on its own AudioSource,
-    /// plays the particles and restarts the level once the whole clip has played.
+    /// plays the particles and, once the whole clip has played, goes to the next level or restarts this one.
     /// </summary>
-    private void ManageCollision(AudioClip audioClip, ParticleSystem particleSystem, float minDelay)
+    private void ManageCollision(AudioClip audioClip, ParticleSystem particleSystem, float minDelay, bool goToNextLevel)
     {
         isControllable = false;
         audioSource.Stop();
@@ -92,17 +114,25 @@ public class CollisionManager : MonoBehaviour
 
         GetComponent<PlayerMovement>().enabled = false;
 
-        Debug.Log($"Restarting level in {delay:0.0}s");
-        StartCoroutine(ReloadLevel(delay));
+        Debug.Log($"Changing scene in {delay:0.0}s");
+        StartCoroutine(ChangeSceneRoutine(delay, goToNextLevel));
     }
 
     /// <summary>
-    /// Waits so the sound can be heard, then reloads the current scene (back to the start of the level).
+    /// Waits so the sound can be heard, then loads the next level or reloads the current one.
     /// </summary>
-    private IEnumerator ReloadLevel(float delay)
+    private IEnumerator ChangeSceneRoutine(float delay, bool goToNextLevel)
     {
         yield return new WaitForSeconds(delay);
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+
+        if (goToNextLevel)
+        {
+            LevelManager.LoadNextLevel();
+        }
+        else
+        {
+            LevelManager.ReloadLevel();
+        }
     }
 
 }

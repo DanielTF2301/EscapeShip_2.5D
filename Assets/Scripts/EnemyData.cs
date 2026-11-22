@@ -5,6 +5,7 @@ public class EnemyData : ScriptableObject
 {
     public string enemyName;
     public GameObject enemyPrefab;
+    public int scoreValue = 10;
 
     [Header("Stats")]
     public int health;

@@ -16,6 +16,9 @@ public class EnemyHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        // Already dead: ignore extra hits in the same frame so the score is not given twice.
+        if (currentHealth <= 0) return;
+
         currentHealth -= damage;
 
         if (currentHealth <= 0)
@@ -26,6 +29,11 @@ public class EnemyHealth : MonoBehaviour
 
     private void Die()
     {
+        if (ScoreManager.Instance != null)
+        {
+            ScoreManager.Instance.AddScore(enemyData.scoreValue);
+        }
+
         CombatVfx.PlayExplosion(transform.position);
         gameObject.SetActive(false);
     }

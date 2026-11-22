@@ -47,7 +47,7 @@ public class Checkpoint : MonoBehaviour
 
         if (activateClip != null)
         {
-            AudioSource.PlayClipAtPoint(activateClip, transform.position);
+            VolumeManager.PlaySfxAtPoint(activateClip, transform.position);
         }
 
         Debug.Log("Checkpoint reached");
