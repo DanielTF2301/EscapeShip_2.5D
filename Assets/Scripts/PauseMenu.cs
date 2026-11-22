@@ -44,6 +44,7 @@ public class PauseMenu : MonoBehaviour
     public void Resume()
     {
         SetPaused(false);
+        LevelManager.ReloadLevel();
     }
 
     public void ShowOptions()
@@ -69,5 +70,11 @@ public class PauseMenu : MonoBehaviour
     {
         Time.timeScale = 1f;
         AudioListener.pause = false;
+    }
+
+    public void Restart()
+    {
+        SetPaused(false);
+        LevelManager.ReloadLevel();
     }
 }
