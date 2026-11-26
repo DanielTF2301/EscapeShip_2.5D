@@ -32,12 +32,12 @@ public class MainMenu : MonoBehaviour
 
         if (bestScoreText != null)
         {
-            bestScoreText.text = "Mejor puntuación: " + SaveSystem.GetMaxScore();
+            bestScoreText.text = "Best highscore: " + SaveSystem.GetMaxScore();
         }
 
         if (maxLevelText != null)
         {
-            maxLevelText.text = "Nivel máximo: " + SaveSystem.GetMaxLevel();
+            maxLevelText.text = "Last level: " + SaveSystem.GetMaxLevel();
         }
 
 #if UNITY_WEBGL
