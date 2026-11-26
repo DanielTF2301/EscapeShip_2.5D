@@ -25,6 +25,7 @@ public class PlayerMovement : MonoBehaviour
     Rigidbody rb;
     AudioSource audioSource;
     PlayerShooting playerShooting;
+    PlayerFuel fuel;
 
     void Awake()
     {
@@ -48,6 +49,7 @@ public class PlayerMovement : MonoBehaviour
         rb.freezeRotation = true;
         audioSource = GetComponent<AudioSource>();
         playerShooting = GetComponent<PlayerShooting>();
+        fuel = GetComponent<PlayerFuel>();
     }
 
     void Update()
@@ -83,9 +85,17 @@ public class PlayerMovement : MonoBehaviour
     }
     private void ProcessThrust()
     {
-        if (thrust.IsPressed())
+        // Without fuel the ship cannot thrust (if there is no PlayerFuel component, fuel is unlimited).
+        bool hasFuel = fuel == null || fuel.HasFuel;
+
+        if (thrust.IsPressed() && hasFuel)
         {
             StartThrusting();
+
+            if (fuel != null)
+            {
+                fuel.Consume(Time.fixedDeltaTime);
+            }
         }
         else
         {

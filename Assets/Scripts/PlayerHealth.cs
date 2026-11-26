@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Contact with an enemy costs its damage (multiplied while the ship is shrunk).
+// The ship blinks and ignores hits for one second.
+// At zero lives the ship explodes (CollisionManager plays the explosion and restarts the level).
 public class PlayerHealth : MonoBehaviour
 {
     [SerializeField] private int lives = 5;
@@ -39,6 +42,17 @@ public class PlayerHealth : MonoBehaviour
         }
 
         bodyRenderers = body.ToArray();
+    }
+
+    /// <summary>
+    /// Gives lives back (never above the starting amount). Returns false if the ship is dead or already full.
+    /// </summary>
+    public bool AddLife(int amount)
+    {
+        if (dead || currentLives >= lives) return false;
+
+        currentLives = Mathf.Min(currentLives + amount, lives);
+        return true;
     }
 
     void OnCollisionEnter(Collision collision)

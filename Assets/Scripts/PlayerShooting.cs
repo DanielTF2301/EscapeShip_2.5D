@@ -24,6 +24,21 @@ public class PlayerShooting : MonoBehaviour
 
     private float lastShotTime = 0f;
 
+    public int CurrentAmmo => currentAmmo;
+    public int MaxAmmo => maxAmmo;
+    public bool InfiniteAmmo => infiniteAmmo;
+
+    /// <summary>
+    /// Adds bullets (never above the maximum). Returns false if the ammo is infinite or already full.
+    /// </summary>
+    public bool AddAmmo(int amount)
+    {
+        if (infiniteAmmo || currentAmmo >= maxAmmo) return false;
+
+        currentAmmo = Mathf.Min(currentAmmo + amount, maxAmmo);
+        return true;
+    }
+
     void Start()
     {
         bulletSpawnPoint = transform.Find("ShootPoint");
@@ -86,6 +101,13 @@ public class PlayerShooting : MonoBehaviour
      
     }
 
+    void OnGUI()
+    {
+        if (infiniteAmmo) return;
+
+        GUI.Label(new Rect(16f, 88f, 260f, 24f), "Ammo: " + currentAmmo + "/" + maxAmmo);
+    }
+
     void PlayShootSound()
     {
         if (shootAudio == null)
@@ -104,6 +126,8 @@ public class PlayerShooting : MonoBehaviour
             return;
         }
 
+        // Each shot cuts the previous one so a burst is heard back to back.
+        // The clip is sfx_laser1 or sfx_laser2, chosen at random.
         shootAudio.Stop();
         shootAudio.clip = clip;
         shootAudio.Play();

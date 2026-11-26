@@ -138,6 +138,8 @@ public class BulletController : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
+        if (other.isTrigger) return;
+
         // An enemy has several colliders. consumed stops the same hit from applying damage more than once.
         if (consumed || other.CompareTag("Player") || other.GetComponent<BulletController>() != null)
         {
